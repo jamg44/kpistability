@@ -7,56 +7,58 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"reflect"
-	"runtime"
 
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 	"google.golang.org/api/slides/v1"
 
 	"kpistability/lib/googletokenhelper"
+	"kpistability/lib/utils"
 )
 
 func main() {
+	defer fmt.Println("End.")
 	//  log.SetFlags(log.LstdFlags | log.Lshortfile) // log error line number from caller in checkErr(err)
 
 	// call WS
-	response, err := http.Get("http://pokeapi.co/api/v2/pokedex/kanto")
-	checkErr(err)
-	responseData, err := io.ReadAll(response.Body)
-	checkErr(err)
-	fmt.Println(reflect.TypeOf(responseData))
-	// fmt.Println(responseData)
+	// url := "http://pokeapi.co/api/v2/pokedex/kanto"
+	url := "http://api.open-notify.org/astros.json"
+	response, err := http.Get(url)
+	utils.CheckErr(err)
+	body, err := io.ReadAll(response.Body)
+	utils.CheckErr(err)
+	// fmt.Println(reflect.TypeOf(body))
+
+	bodyStr, err := utils.PrettyPrintJSONResponse(body)
+	utils.CheckErr(err)
+	log.Println(bodyStr)
 
 	// work with sheets
+	// slideElementsCount()
+}
+
+func slideElementsCount() {
 	ctx := context.Background()
 	b, err := os.ReadFile(".auth/credentials.json")
-	checkErr(err)
+	utils.CheckErr(err)
 
 	// If modifying these scopes, delete your previously saved token.json.
 	config, err := google.ConfigFromJSON(b, "https://www.googleapis.com/auth/presentationconss.readonly")
-	checkErr(err)
+	utils.CheckErr(err)
 	client := googletokenhelper.GetClient(config)
 
 	srv, err := slides.NewService(ctx, option.WithHTTPClient(client))
-	checkErr(err)
+	utils.CheckErr(err)
 
 	// Prints the number of slides and elements in a sample presentation:
 	// https://docs.google.com/presentation/d/1EAYk18WDjIG-zp_0vLm3CsfQh_i8eXc67Jo2O9C6Vuc/edit
 	presentationId := "1EAYk18WDjIG-zp_0vLm3CsfQh_i8eXc67Jo2O9C6Vuc"
 	presentation, err := srv.Presentations.Get(presentationId).Do()
-	checkErr(err)
+	utils.CheckErr(err)
 
 	fmt.Printf("The presentation contains %d slides:\n", len(presentation.Slides))
 	for i, slide := range presentation.Slides {
 		fmt.Printf("- Slide #%d contains %d elements.\n", (i + 1),
 			len(slide.PageElements))
-	}
-}
-
-func checkErr(err error) {
-	if err != nil {
-		pc, filename, line, _ := runtime.Caller(1)
-		log.Fatalf("[error] %v (%s in %s:%d)", err, runtime.FuncForPC(pc).Name(), filename, line)
 	}
 }
