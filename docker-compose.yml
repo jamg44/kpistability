@@ -1,0 +1,37 @@
+version: "3.3"
+services:
+  # mongodb:
+  #   image : mongo
+  #   container_name: mongo-my-app
+  #   ports:
+  #   - 27018:27017
+  #   restart: always
+  #   volumes:
+  #   - mongo-vol:/data/db
+  #   environment:
+  #     - MONGO_INITDB_ROOT_USERNAME=user
+  #     - MONGO_INITDB_ROOT_PASSWORD=pass
+  # ## Postgres, redis, minio, etc ...
+
+
+  my-app:
+    image: cosmtrek/air
+    # working_dir value has to be the same of mapped volume
+    working_dir: /project
+    ports:
+      - 8000:8000
+    volumes:
+      - ./:/project/
+    container_name: my-app
+    # links:
+    # - mongodb
+    # environment:
+    # - PORT=8000
+    # - MONGO_HOST=mongodb
+    # - MONGO_USER=user
+    # - MONGO_PASSWORD=pass
+    # - MONGO_PORT=27018
+    # - MONGO_DATABASE=test
+
+# volumes:
+#   mongo-vol:
